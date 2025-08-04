@@ -117,6 +117,13 @@ PuppetLint.new_check(:strict_indent) do
         next_token = next_token.next_token
       end
 
+      # For a lone semicolon within a block decrement immediately. Use temp_indent because
+      # indent will be decremented in the next line by the prev_token logic above.
+      temp_indent -= 1 if !colon_indent.nil? and
+                          token.next_token.type == :INDENT and
+                          token.next_token.next_token.type == :SEMIC and
+                          token.next_token.next_token.next_token.type == :NEWLINE
+
       # obviously we have a problem
       if indent < 0
         notify :error, {
